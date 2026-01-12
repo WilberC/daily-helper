@@ -7,6 +7,7 @@ import Toast from 'primevue/toast'
 import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
 import CreateUserForm from '@/components/users/CreateUserForm.vue'
+import UserList from '@/components/users/UserList.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -68,6 +69,15 @@ const handleLogout = async () => {
                 Create a new staff account with limited access.
               </p>
               <CreateUserForm :is-admin="false" />
+            </div>
+          </TabPanel>
+          
+          <TabPanel header="Manage Users">
+            <div class="py-4">
+              <p class="text-dark-text-secondary mb-6">
+                View and manage all users. You can update user information and permissions for non-admin users.
+              </p>
+              <UserList />
             </div>
           </TabPanel>
         </TabView>

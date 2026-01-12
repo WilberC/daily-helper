@@ -1,0 +1,100 @@
+---
+description: Best practices for async/sync in Strawberry GraphQL with Django
+---
+
+# Async/Sync Best Practices for Strawberry GraphQL + Django
+
+## The Problem
+
+When using Strawberry GraphQL with Django, you might encounter the error:
+```
+You cannot call this from an async context - use a thread or sync_to_async
+```
+
+This happens when trying to access Django ORM queries from async resolvers.
+
+## The Solution: Default to Sync
+
+**Instead of making everything async and wrapping with `sync_to_async`, do the opposite:**
+
+✅ **Make all resolvers synchronous by default**
+❌ Don't use `async`/`await` unless you have a specific reason
+
+### Why This Approach is Better
+
+1. **Django ORM is synchronous** - It works best in sync contexts
+2. **Simpler code** - No need for `sync_to_async` wrappers everywhere
+3. **Better performance** - Avoid unnecessary async overhead
+4. **Fewer bugs** - Less context switching means fewer edge cases
+5. **Easier to maintain** - Straightforward, predictable code flow
+
+## When to Use Async
+
+Only use `async` resolvers when you have:
+
+1. **External API calls** that support async (using `httpx`, `aiohttp`, etc.)
+2. **I/O-bound operations** that can run concurrently
+3. **Multiple independent operations** that can be parallelized
+4. **Specific async libraries** that require async context
+
+## Example Refactoring
+
+### ❌ Before (Unnecessarily Async)
+
+```python
+@strawberry.field
+async def all_users(self, info: Info) -> list[UserType]:
+    @sync_to_async
+    def check_permissions():
+        user = info.context.request.user
+        return user.is_authenticated and user.is_staff
+    
+    if not await check_permissions():
+        return []
+    
+    @sync_to_async
+    def get_users():
+        return list(User.objects.filter(is_superuser=False))
+    
+    return await get_users()
+```
+
+### ✅ After (Clean Sync)
+
+```python
+@strawberry.field
+def all_users(self, info: Info) -> list[UserType]:
+    user = info.context.request.user
+    if not (user.is_authenticated and user.is_staff):
+        return []
+    
+    return list(User.objects.filter(is_superuser=False))
+```
+
+## Configuration
+
+Strawberry GraphQL runs in **sync mode by default** when you don't specify async resolvers. This is perfect for Django projects.
+
+No special configuration needed - just write normal synchronous Python code!
+
+## When You Actually Need Async
+
+If you have a legitimate use case for async (e.g., calling external APIs), here's how:
+
+```python
+import httpx
+
+@strawberry.field
+async def fetch_external_data(self, info: Info) -> str:
+    # This is a good use of async - external API call
+    async with httpx.AsyncClient() as client:
+        response = await client.get("https://api.example.com/data")
+        return response.text
+```
+
+## Summary
+
+- **Default to sync** for all Django ORM operations
+- **Use async sparingly** only when you have true async I/O operations
+- **Keep it simple** - don't add async complexity unless necessary
+- **Trust Django** - it's designed to work synchronously and does it well

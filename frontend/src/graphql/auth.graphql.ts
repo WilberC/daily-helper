@@ -67,3 +67,41 @@ export const ME_QUERY = gql`
     }
   }
 `
+
+export const ALL_USERS_QUERY = gql`
+  query AllUsers {
+    allUsers {
+      id
+      username
+      email
+      firstName
+      lastName
+      isActive
+      isStaff
+      dateJoined
+      createdAt
+      updatedAt
+    }
+  }
+`
+
+export const UPDATE_USER_MUTATION = gql`
+  mutation UpdateUser($input: UpdateUserInput!) {
+    updateUser(input: $input) {
+      success
+      message
+      user {
+        id
+        username
+        email
+        firstName
+        lastName
+        isActive
+        isStaff
+        dateJoined
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`

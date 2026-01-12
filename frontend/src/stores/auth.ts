@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { User, LoginPayload, RegisterPayload, LogoutPayload, RegisterInput } from '@/types/user'
-import { LOGIN_MUTATION, REGISTER_MUTATION, LOGOUT_MUTATION, ME_QUERY } from '@/graphql/auth.graphql'
+import type { User, LoginPayload, RegisterPayload, LogoutPayload, RegisterInput, UpdateUserInput, UpdateUserPayload } from '@/types/user'
+import { LOGIN_MUTATION, REGISTER_MUTATION, LOGOUT_MUTATION, ME_QUERY, ALL_USERS_QUERY, UPDATE_USER_MUTATION } from '@/graphql/auth.graphql'
 import { urqlClient } from '@/config/api'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -119,6 +119,48 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    // Fetch all users (admin only)
+    const fetchAllUsers = async (): Promise<User[]> => {
+        try {
+            const result = await urqlClient.query(ALL_USERS_QUERY, {}).toPromise()
+
+            if (!result.error && result.data?.allUsers) {
+                return result.data.allUsers as User[]
+            }
+            return []
+        } catch (error) {
+            console.error('Error fetching users:', error)
+            return []
+        }
+    }
+
+    // Update user (admin only)
+    const updateUser = async (input: UpdateUserInput): Promise<UpdateUserPayload> => {
+        isLoading.value = true
+
+        try {
+            const result = await urqlClient.mutation(UPDATE_USER_MUTATION, { input }).toPromise()
+
+            if (result.error) {
+                isLoading.value = false
+                return {
+                    success: false,
+                    message: result.error.message || 'Update failed',
+                }
+            }
+
+            const payload = result.data?.updateUser as UpdateUserPayload
+            isLoading.value = false
+            return payload
+        } catch (error) {
+            isLoading.value = false
+            return {
+                success: false,
+                message: error instanceof Error ? error.message : 'An error occurred',
+            }
+        }
+    }
+
     return {
         currentUser,
         isLoading,
@@ -129,5 +171,7 @@ export const useAuthStore = defineStore('auth', () => {
         register,
         logout,
         fetchCurrentUser,
+        fetchAllUsers,
+        updateUser,
     }
 })

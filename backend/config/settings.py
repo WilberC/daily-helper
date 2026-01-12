@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from . import env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3b8*qtomaq7a3-%2n(kylhp$&*^v1hu59)y_b%ffr0&bh!&v#d'
+SECRET_KEY = env.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.DEBUG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.ALLOWED_HOSTS
 
 
 # Application definition
@@ -130,13 +131,26 @@ STRAWBERRY_DJANGO = {
 AUTH_USER_MODEL = 'users.User'
 
 # Session Configuration for Authentication
-SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
+SESSION_COOKIE_AGE = env.SESSION_COOKIE_AGE  # 24 hours in seconds
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Lax'
+# For cross-origin requests, SameSite must be 'None' and Secure must be False in development
+SESSION_COOKIE_SAMESITE = env.SESSION_COOKIE_SAMESITE  # Required for cross-origin cookie sharing
+SESSION_COOKIE_SECURE = env.SESSION_COOKIE_SECURE  # Set to True in production with HTTPS
+SESSION_COOKIE_NAME = 'sessionid'  # Explicit session cookie name
 
 # CORS Configuration for Frontend
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',  # Vite dev server
-]
+CORS_ALLOWED_ORIGINS = env.CORS_ALLOWED_ORIGINS
 CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ['Set-Cookie']  # Allow frontend to read Set-Cookie header
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]

@@ -42,3 +42,18 @@ export interface LogoutPayload {
     success: boolean
     message: string
 }
+
+export interface UpdateUserInput {
+    userId: string
+    email?: string
+    firstName?: string
+    lastName?: string
+    isStaff?: boolean
+    isActive?: boolean
+}
+
+export interface UpdateUserPayload {
+    success: boolean
+    message: string
+    user?: User
+}

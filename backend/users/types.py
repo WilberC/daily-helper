@@ -60,3 +60,22 @@ class LogoutPayload:
     success: bool
     message: str
 
+
+@strawberry.input
+class UpdateUserInput:
+    """Input type for updating user information (admin-only)."""
+    user_id: str
+    email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    is_staff: Optional[bool] = None
+    is_active: Optional[bool] = None
+
+
+@strawberry.type
+class UpdateUserPayload:
+    """Response payload for update user mutation."""
+    success: bool
+    message: str
+    user: Optional[UserType] = None
+

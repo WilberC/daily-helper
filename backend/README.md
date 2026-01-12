@@ -28,12 +28,40 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Database Setup
+### 2. Environment Configuration
+
+Copy the example environment file and configure it for your environment:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your configuration. Key settings:
+
+**Development (default values):**
+- `DEBUG=True`
+- `SESSION_COOKIE_SAMESITE=None` (required for cross-origin requests)
+- `SESSION_COOKIE_SECURE=False` (HTTP is fine for local development)
+- `CORS_ALLOWED_ORIGINS=http://localhost:5173`
+
+**Production:**
+- `DEBUG=False`
+- `SESSION_COOKIE_SAMESITE=Lax` (more secure for same-origin)
+- `SESSION_COOKIE_SECURE=True` (requires HTTPS)
+- `CORS_ALLOWED_ORIGINS=https://yourdomain.com`
+- Generate a new `SECRET_KEY`:
+  ```bash
+  python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+  ```
+
+See `.env.example` for all available configuration options.
+
+### 3. Database Setup
 ```bash
 python manage.py migrate
 ```
 
-### 3. Seeding Data
+### 4. Seeding Data
 The backend includes a custom seeding system to prepopulate your database with essential reference data and sample products.
 
 Run the master seed command:
@@ -47,7 +75,7 @@ python manage.py seed_products
 python manage.py seed_brands
 ```
 
-### 4. Running the Server
+### 5. Running the Server
 ```bash
 python manage.py runserver
 ```
