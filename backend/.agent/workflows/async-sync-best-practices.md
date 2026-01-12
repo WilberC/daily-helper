@@ -73,9 +73,36 @@ def all_users(self, info: Info) -> list[UserType]:
 
 ## Configuration
 
-Strawberry GraphQL runs in **sync mode by default** when you don't specify async resolvers. This is perfect for Django projects.
+**CRITICAL:** You must use the **synchronous** `GraphQLView` in your URLs configuration!
 
-No special configuration needed - just write normal synchronous Python code!
+### ✅ Correct Configuration (urls.py)
+
+```python
+from strawberry.django.views import GraphQLView  # NOT AsyncGraphQLView!
+from .schema import schema
+
+urlpatterns = [
+    path('graphql/', csrf_exempt(GraphQLView.as_view(schema=schema))),
+]
+```
+
+### ❌ Wrong Configuration
+
+```python
+from strawberry.django.views import AsyncGraphQLView  # This forces async context!
+from .schema import schema
+
+urlpatterns = [
+    path('graphql/', csrf_exempt(AsyncGraphQLView.as_view(schema=schema))),
+]
+```
+
+**Why this matters:** Using `AsyncGraphQLView` forces all resolvers to run in an async context, which causes the "You cannot call this from an async context" error when accessing Django ORM. Even if your resolvers are synchronous, the async view wrapper will break them.
+
+**Rule of thumb:** 
+- Use `GraphQLView` (sync) for Django projects with ORM operations
+- Only use `AsyncGraphQLView` if you have truly async resolvers AND async database drivers (like `databases` or `asyncpg`)
+
 
 ## When You Actually Need Async
 
