@@ -22,12 +22,21 @@ class GraphQLAuthMiddleware:
     def __call__(self, request):
         # Only apply to GraphQL endpoint
         if request.path.startswith('/graphql'):
+            # Ensure session is loaded (it should be by SessionMiddleware, but let's be explicit)
+            if hasattr(request, 'session'):
+                # Force session load to ensure user authentication is current
+                _ = request.session.session_key
+            
             # Check if user is authenticated
             if not request.user.is_authenticated:
                 # Allow login mutation to pass through
                 if request.method == 'POST':
                     try:
-                        body = json.loads(request.body.decode('utf-8'))
+                        # Read and cache the body to avoid consuming it
+                        if not hasattr(request, '_cached_body'):
+                            request._cached_body = request.body
+                        
+                        body = json.loads(request._cached_body.decode('utf-8'))
                         query = body.get('query', '')
                         operation_name = body.get('operationName', '')
                         
@@ -52,7 +61,7 @@ class GraphQLAuthMiddleware:
                                     }
                                 }]
                             }, status=401)
-                    except (json.JSONDecodeError, UnicodeDecodeError):
+                    except (json.JSONDecodeError, UnicodeDecodeError, AttributeError):
                         # If we can't parse the body, block the request
                         return JsonResponse({
                             'errors': [{

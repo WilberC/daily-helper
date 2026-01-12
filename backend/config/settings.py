@@ -135,9 +135,10 @@ AUTH_USER_MODEL = 'users.User'
 SESSION_COOKIE_AGE = env.SESSION_COOKIE_AGE  # 24 hours in seconds
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = True
-# For cross-origin requests, SameSite must be 'None' and Secure must be False in development
-SESSION_COOKIE_SAMESITE = env.SESSION_COOKIE_SAMESITE  # Required for cross-origin cookie sharing
-SESSION_COOKIE_SECURE = env.SESSION_COOKIE_SECURE  # Set to True in production with HTTPS
+# For cross-origin requests: Use 'Lax' for development (HTTP), 'None' for production (HTTPS)
+# Note: SameSite=None requires Secure=True, which requires HTTPS
+SESSION_COOKIE_SAMESITE = env.SESSION_COOKIE_SAMESITE  # 'Lax' for dev, 'None' for production
+SESSION_COOKIE_SECURE = env.SESSION_COOKIE_SECURE  # False for dev (HTTP), True for production (HTTPS)
 SESSION_COOKIE_NAME = 'sessionid'  # Explicit session cookie name
 
 # CORS Configuration for Frontend
