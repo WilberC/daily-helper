@@ -10,6 +10,11 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Checkbox from 'primevue/checkbox'
 import Tag from 'primevue/tag'
+import SectionHeading from '@/components/common/typography/SectionHeading.vue'
+import SubHeading from '@/components/common/typography/SubHeading.vue'
+import FormField from '@/components/common/form/FormField.vue'
+import InfoBox from '@/components/common/feedback/InfoBox.vue'
+import Badge from '@/components/common/utils/Badge.vue'
 
 const toast = useToast()
 const authStore = useAuthStore()
@@ -98,7 +103,7 @@ onMounted(() => {
 <template>
   <div class="user-list-container">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-semibold text-dark-text">All Users</h2>
+      <SectionHeading variant="primary">All Users</SectionHeading>
       <Button
         label="Refresh"
         icon="pi pi-refresh"
@@ -136,19 +141,13 @@ onMounted(() => {
 
       <Column field="isStaff" header="Role" sortable>
         <template #body="{ data }">
-          <Tag
-            :value="data.isStaff ? 'Admin' : 'Staff'"
-            :severity="data.isStaff ? 'danger' : 'info'"
-          />
+          <Badge :variant="data.isStaff ? 'admin' : 'staff'" />
         </template>
       </Column>
 
       <Column field="isActive" header="Status" sortable>
         <template #body="{ data }">
-          <Tag
-            :value="data.isActive ? 'Active' : 'Inactive'"
-            :severity="data.isActive ? 'success' : 'warning'"
-          />
+          <Badge :variant="data.isActive ? 'active' : 'inactive'" />
         </template>
       </Column>
 
@@ -184,10 +183,7 @@ onMounted(() => {
     >
       <div class="space-y-4 py-4">
         <!-- Email -->
-        <div class="flex flex-col gap-2">
-          <label for="edit-email" class="text-dark-text font-medium">
-            Email <span class="text-red-400">*</span>
-          </label>
+        <FormField label="Email" for="edit-email" required>
           <InputText
             id="edit-email"
             v-model="editForm.email"
@@ -195,33 +191,31 @@ onMounted(() => {
             placeholder="Enter email"
             class="w-full"
           />
-        </div>
+        </FormField>
 
         <!-- First Name -->
-        <div class="flex flex-col gap-2">
-          <label for="edit-firstName" class="text-dark-text font-medium">First Name</label>
+        <FormField label="First Name" for="edit-firstName">
           <InputText
             id="edit-firstName"
             v-model="editForm.firstName"
             placeholder="Enter first name"
             class="w-full"
           />
-        </div>
+        </FormField>
 
         <!-- Last Name -->
-        <div class="flex flex-col gap-2">
-          <label for="edit-lastName" class="text-dark-text font-medium">Last Name</label>
+        <FormField label="Last Name" for="edit-lastName">
           <InputText
             id="edit-lastName"
             v-model="editForm.lastName"
             placeholder="Enter last name"
             class="w-full"
           />
-        </div>
+        </FormField>
 
         <!-- Permissions Section -->
         <div class="bg-slate-800 border border-slate-700 rounded-lg p-4 space-y-3">
-          <h3 class="text-dark-text font-medium mb-3">Permissions</h3>
+          <SubHeading>Permissions</SubHeading>
           
           <!-- Staff Permission -->
           <div class="flex items-center gap-2">
@@ -231,7 +225,7 @@ onMounted(() => {
               :binary="true"
               :disabled="editingUser?.isStaff"
             />
-            <label for="edit-isStaff" class="text-dark-text cursor-pointer">
+            <label for="edit-isStaff" class="text-surface-700 dark:text-dark-text cursor-pointer">
               Admin Access
             </label>
           </div>
@@ -243,15 +237,19 @@ onMounted(() => {
               v-model="editForm.isActive"
               :binary="true"
             />
-            <label for="edit-isActive" class="text-dark-text cursor-pointer">
+            <label for="edit-isActive" class="text-surface-700 dark:text-dark-text cursor-pointer">
               Active Account
             </label>
           </div>
 
-          <p v-if="editingUser?.isStaff" class="text-yellow-400 text-sm mt-2">
-            <i class="pi pi-exclamation-triangle mr-1"></i>
-            Admin users' permissions cannot be modified
-          </p>
+          <InfoBox v-if="editingUser?.isStaff" variant="warning">
+            <template #default="{ textColor }">
+              <p :class="textColor">
+                <i class="pi pi-exclamation-triangle mr-1"></i>
+                Admin users' permissions cannot be modified
+              </p>
+            </template>
+          </InfoBox>
         </div>
       </div>
 
@@ -274,114 +272,3 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
-.user-list-container {
-  width: 100%;
-}
-
-:deep(.user-table) {
-  background: transparent;
-}
-
-:deep(.p-datatable .p-datatable-header) {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-:deep(.p-datatable .p-datatable-thead > tr > th) {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr) {
-  background: #0f172a;
-  color: #f1f5f9;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr:hover) {
-  background: rgba(59, 130, 246, 0.1);
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr.p-row-odd) {
-  background: #1e293b;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr.p-row-odd:hover) {
-  background: rgba(59, 130, 246, 0.15);
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr > td) {
-  border-color: #334155;
-}
-
-:deep(.p-paginator) {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-:deep(.p-paginator .p-paginator-pages .p-paginator-page) {
-  color: #94a3b8;
-}
-
-:deep(.p-paginator .p-paginator-pages .p-paginator-page.p-highlight) {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: #f1f5f9;
-}
-
-:deep(.p-dialog) {
-  background: #1e293b;
-  border: 1px solid #334155;
-}
-
-:deep(.p-dialog .p-dialog-header) {
-  background: #1e293b;
-  border-bottom: 1px solid #334155;
-  color: #f1f5f9;
-}
-
-:deep(.p-dialog .p-dialog-content) {
-  background: #1e293b;
-  color: #f1f5f9;
-}
-
-:deep(.p-dialog .p-dialog-footer) {
-  background: #1e293b;
-  border-top: 1px solid #334155;
-}
-
-:deep(.p-inputtext) {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-:deep(.p-inputtext:enabled:hover) {
-  border-color: #475569;
-}
-
-:deep(.p-inputtext:enabled:focus) {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
-}
-
-:deep(.p-checkbox) {
-  border-color: #334155;
-}
-
-:deep(.p-checkbox:hover) {
-  border-color: #475569;
-}
-
-:deep(.p-checkbox.p-highlight) {
-  background: #3b82f6;
-  border-color: #3b82f6;
-}
-
-:deep(.p-button) {
-  font-weight: 600;
-}
-</style>

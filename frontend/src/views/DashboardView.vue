@@ -6,6 +6,16 @@ import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Toast from 'primevue/toast'
+import ThemeToggle from '@/components/ThemeToggle.vue'
+import PageWrapper from '@/components/layout/PageWrapper.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
+import PageContainer from '@/components/layout/PageContainer.vue'
+import PageHeading from '@/components/common/typography/PageHeading.vue'
+import SectionHeading from '@/components/common/typography/SectionHeading.vue'
+import BodyText from '@/components/common/typography/BodyText.vue'
+import DataField from '@/components/common/display/DataField.vue'
+import InfoBox from '@/components/common/feedback/InfoBox.vue'
+import GridContainer from '@/components/layout/GridContainer.vue'
 
 const router = useRouter()
 const toast = useToast()
@@ -41,72 +51,64 @@ const goToUserManagement = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-dark-bg">
+  <PageWrapper>
     <Toast />
     
     <!-- Header -->
-    <header class="bg-dark-surface border-b border-dark-border">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div class="flex justify-between items-center">
-          <h1 class="text-2xl font-bold text-dark-text">Daily Helper</h1>
-          <Button
-            label="Logout"
-            icon="pi pi-sign-out"
-            severity="danger"
-            outlined
-            @click="handleLogout"
-          />
-        </div>
-      </div>
-    </header>
+    <PageHeader>
+      <template #title>
+        <PageHeading>Daily Helper</PageHeading>
+      </template>
+      
+      <template #actions>
+        <ThemeToggle />
+        <Button
+          label="Logout"
+          icon="pi pi-sign-out"
+          severity="danger"
+          outlined
+          @click="handleLogout"
+        />
+      </template>
+    </PageHeader>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <PageContainer>
+      <GridContainer cols="2">
         <!-- Welcome Card -->
-        <Card class="bg-dark-surface border border-dark-border">
+        <Card>
           <template #header>
             <div class="p-6 pb-0">
-              <h2 class="text-xl font-semibold text-dark-text">Welcome Back!</h2>
+              <SectionHeading variant="primary">Welcome Back!</SectionHeading>
             </div>
           </template>
           
           <template #content>
             <div class="space-y-3">
-              <div>
-                <p class="text-sm text-dark-text-secondary">Username</p>
-                <p class="text-lg font-medium text-dark-text">{{ user?.username }}</p>
-              </div>
+              <DataField label="Username" :value="user?.username" />
+              <DataField label="Email" :value="user?.email" />
               
-              <div>
-                <p class="text-sm text-dark-text-secondary">Email</p>
-                <p class="text-lg font-medium text-dark-text">{{ user?.email }}</p>
-              </div>
-              
-              <div>
-                <p class="text-sm text-dark-text-secondary">Role</p>
-                <p class="text-lg font-medium text-dark-text">
-                  <i :class="authStore.isAdmin ? 'pi pi-shield' : 'pi pi-user'" class="mr-2"></i>
-                  {{ userRole }}
-                </p>
-              </div>
+              <DataField label="Role">
+                <i :class="authStore.isAdmin ? 'pi pi-shield' : 'pi pi-user'" class="mr-2"></i>
+                {{ userRole }}
+              </DataField>
             </div>
           </template>
         </Card>
 
         <!-- Quick Actions Card -->
-        <Card v-if="authStore.isAdmin" class="bg-dark-surface border border-dark-border">
+        <Card v-if="authStore.isAdmin">
           <template #header>
             <div class="p-6 pb-0">
-              <h2 class="text-xl font-semibold text-dark-text">Quick Actions</h2>
+              <SectionHeading>Quick Actions</SectionHeading>
             </div>
           </template>
           
           <template #content>
             <div class="space-y-4">
-              <p class="text-dark-text-secondary">
+              <BodyText>
                 As an administrator, you have access to user management features.
-              </p>
+              </BodyText>
               
               <Button
                 label="Manage Users"
@@ -120,31 +122,24 @@ const goToUserManagement = () => {
         </Card>
 
         <!-- Info Card for Non-Admin -->
-        <Card v-else class="bg-dark-surface border border-dark-border">
+        <Card v-else>
           <template #header>
             <div class="p-6 pb-0">
-              <h2 class="text-xl font-semibold text-dark-text">Information</h2>
+              <SectionHeading variant="primary">Information</SectionHeading>
             </div>
           </template>
           
           <template #content>
-            <p class="text-dark-text-secondary">
-              You are logged in as a staff member. Contact an administrator for user management access.
-            </p>
+            <InfoBox variant="info">
+              <template #default="{ textColor }">
+                <p :class="textColor">
+                  You are logged in as a staff member. Contact an administrator for user management access.
+                </p>
+              </template>
+            </InfoBox>
           </template>
         </Card>
-      </div>
-    </main>
-  </div>
+      </GridContainer>
+    </PageContainer>
+  </PageWrapper>
 </template>
-
-<style scoped>
-:deep(.p-card) {
-  background: var(--p-surface-0);
-  border-radius: 0.75rem;
-}
-
-:deep(.p-button) {
-  font-weight: 600;
-}
-</style>
