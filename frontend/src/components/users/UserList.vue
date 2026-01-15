@@ -1,8 +1,11 @@
+/** * Displays a list of users in a data table with edit capabilities. * Allows administrators to
+view and update user information. * @component */
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '@/stores/auth'
 import type { User, UpdateUserInput } from '@/types/user'
+import { formatDate } from '@/composables/useFormatters'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -87,14 +90,6 @@ const saveUser = async () => {
   }
 }
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
-
 onMounted(() => {
   loadUsers()
 })
@@ -123,11 +118,12 @@ onMounted(() => {
       :rowsPerPageOptions="[5, 10, 20, 50]"
       class="user-table"
       responsiveLayout="scroll"
+      aria-label="User list table"
     >
       <Column field="username" header="Username" sortable>
         <template #body="{ data }">
           <div class="flex items-center gap-2">
-            <i class="pi pi-user text-blue-400"></i>
+            <i class="pi pi-user text-primary-400" aria-hidden="true"></i>
             <span class="font-medium">{{ data.username }}</span>
           </div>
         </template>
@@ -166,6 +162,7 @@ onMounted(() => {
             rounded
             @click="openEditDialog(data)"
             :disabled="data.isStaff"
+            :aria-label="data.isStaff ? 'Cannot edit admin users' : `Edit user ${data.username}`"
             v-tooltip.top="data.isStaff ? 'Cannot edit admin users' : 'Edit user'"
           />
         </template>
@@ -214,9 +211,11 @@ onMounted(() => {
         </FormField>
 
         <!-- Permissions Section -->
-        <div class="bg-slate-800 border border-slate-700 rounded-lg p-4 space-y-3">
+        <div
+          class="bg-surface-0 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-lg p-4 space-y-3"
+        >
           <SubHeading>Permissions</SubHeading>
-          
+
           <!-- Staff Permission -->
           <div class="flex items-center gap-2">
             <Checkbox
@@ -232,11 +231,7 @@ onMounted(() => {
 
           <!-- Active Status -->
           <div class="flex items-center gap-2">
-            <Checkbox
-              id="edit-isActive"
-              v-model="editForm.isActive"
-              :binary="true"
-            />
+            <Checkbox id="edit-isActive" v-model="editForm.isActive" :binary="true" />
             <label for="edit-isActive" class="text-surface-700 dark:text-dark-text cursor-pointer">
               Active Account
             </label>
@@ -261,14 +256,8 @@ onMounted(() => {
           severity="secondary"
           outlined
         />
-        <Button
-          label="Save Changes"
-          icon="pi pi-check"
-          @click="saveUser"
-          severity="primary"
-        />
+        <Button label="Save Changes" icon="pi pi-check" @click="saveUser" severity="primary" />
       </template>
     </Dialog>
   </div>
 </template>
-
