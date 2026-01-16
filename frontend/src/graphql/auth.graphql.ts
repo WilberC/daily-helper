@@ -13,6 +13,7 @@ export const LOGIN_MUTATION = gql`
         lastName
         isActive
         isStaff
+        isSuperuser
         dateJoined
         createdAt
         updatedAt
@@ -34,6 +35,7 @@ export const REGISTER_MUTATION = gql`
         lastName
         isActive
         isStaff
+        isSuperuser
         dateJoined
         createdAt
         updatedAt
@@ -61,6 +63,7 @@ export const ME_QUERY = gql`
       lastName
       isActive
       isStaff
+      isSuperuser
       dateJoined
       createdAt
       updatedAt
@@ -78,6 +81,7 @@ export const ALL_USERS_QUERY = gql`
       lastName
       isActive
       isStaff
+      isSuperuser
       dateJoined
       createdAt
       updatedAt
@@ -98,6 +102,7 @@ export const UPDATE_USER_MUTATION = gql`
         lastName
         isActive
         isStaff
+        isSuperuser
         dateJoined
         createdAt
         updatedAt

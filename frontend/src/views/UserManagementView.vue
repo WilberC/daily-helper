@@ -32,22 +32,17 @@ const handleLogout = async () => {
 <template>
   <PageWrapper>
     <Toast />
-    
+
     <!-- Header -->
     <PageHeader>
       <template #back-button>
-        <Button
-          icon="pi pi-arrow-left"
-          severity="secondary"
-          text
-          @click="goToDashboard"
-        />
+        <Button icon="pi pi-arrow-left" severity="secondary" text @click="goToDashboard" />
       </template>
-      
+
       <template #title>
         <PageHeading>User Management</PageHeading>
       </template>
-      
+
       <template #actions>
         <ThemeToggle />
         <Button
@@ -67,25 +62,36 @@ const handleLogout = async () => {
           <TabPanel header="Create Admin User">
             <div class="py-4">
               <BodyText class="mb-6">
-                Create a new administrator account with full system access.
+                Create a new administrator account with full system access including user
+                management.
               </BodyText>
-              <CreateUserForm :is-admin="true" />
+              <CreateUserForm user-type="admin" />
             </div>
           </TabPanel>
-          
+
           <TabPanel header="Create Staff User">
             <div class="py-4">
               <BodyText class="mb-6">
-                Create a new staff account with limited access.
+                Create a new staff account with elevated privileges but no user management access.
               </BodyText>
-              <CreateUserForm :is-admin="false" />
+              <CreateUserForm user-type="staff" />
             </div>
           </TabPanel>
-          
+
+          <TabPanel header="Create Normal User">
+            <div class="py-4">
+              <BodyText class="mb-6">
+                Create a new normal account with standard user access.
+              </BodyText>
+              <CreateUserForm user-type="normal" />
+            </div>
+          </TabPanel>
+
           <TabPanel header="Manage Users">
             <div class="py-4">
               <BodyText class="mb-6">
-                View and manage all users. You can update user information and permissions for non-admin users.
+                View and manage all users. You can update user information and permissions for
+                non-admin users.
               </BodyText>
               <UserList />
             </div>

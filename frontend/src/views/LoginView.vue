@@ -62,7 +62,7 @@ const onSubmit = handleSubmit(async (values) => {
 <template>
   <div class="min-h-screen flex items-center justify-center bg-surface-50 dark:bg-dark-bg px-4 py-8">
     <Toast />
-    
+
     <Card class="w-full max-w-md shadow-2xl">
       <template #header>
         <div class="text-center pt-6 pb-2">
@@ -70,7 +70,7 @@ const onSubmit = handleSubmit(async (values) => {
           <BodyText size="sm" class="mt-2">Sign in to your account</BodyText>
         </div>
       </template>
-      
+
       <template #content>
         <form @submit="onSubmit" class="space-y-6">
           <!-- Username Field -->
@@ -94,7 +94,7 @@ const onSubmit = handleSubmit(async (values) => {
               :class="{ 'p-invalid': errors.password }"
               :feedback="false"
               toggle-mask
-              class="w-full"
+              input-class="w-full"
               autocomplete="current-password"
             />
           </FormField>
@@ -109,7 +109,7 @@ const onSubmit = handleSubmit(async (values) => {
           />
         </form>
       </template>
-      
+
       <template #footer>
         <div class="text-center text-sm text-dark-text-secondary">
           <p>Admin access required for user management</p>

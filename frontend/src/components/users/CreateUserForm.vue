@@ -16,7 +16,7 @@ import InfoBox from '@/components/common/feedback/InfoBox.vue'
 import Label from '@/components/common/typography/Label.vue'
 
 interface Props {
-  isAdmin: boolean
+  userType: 'admin' | 'staff' | 'normal'
 }
 
 const props = defineProps<Props>()
@@ -30,10 +30,7 @@ const schema = yup.object({
     .string()
     .required('Username is required')
     .min(3, 'Username must be at least 3 characters'),
-  email: yup
-    .string()
-    .required('Email is required')
-    .email('Must be a valid email'),
+  email: yup.string().required('Email is required').email('Must be a valid email'),
   password: yup
     .string()
     .required('Password is required')
@@ -73,7 +70,8 @@ const onSubmit = handleSubmit(async (values) => {
     password: values.password,
     firstName: values.firstName || undefined,
     lastName: values.lastName || undefined,
-    isStaff: props.isAdmin, // Set based on which tab/form is active
+    isSuperuser: props.userType === 'admin',
+    isStaff: props.userType === 'admin' || props.userType === 'staff',
     isActive: values.isActive,
   }
 
@@ -159,33 +157,36 @@ const onSubmit = handleSubmit(async (values) => {
         placeholder="Enter password"
         :class="{ 'p-invalid': errors.password }"
         toggle-mask
-        class="w-full"
+        input-class="w-full"
         autocomplete="new-password"
       />
     </FormField>
 
     <!-- Active Checkbox -->
     <div class="flex items-center gap-2">
-      <Checkbox
-        id="isActive"
-        v-model="isActive"
-        :binary="true"
-      />
-      <Label for="isActive" class="cursor-pointer">
-        Active Account
-      </Label>
+      <Checkbox id="isActive" v-model="isActive" :binary="true" />
+      <Label for="isActive" class="cursor-pointer"> Active Account </Label>
     </div>
 
     <!-- Role Info -->
     <InfoBox variant="info">
       <template #default="{ titleColor, textColor }">
         <p :class="[titleColor, 'font-medium mb-1']">
-          {{ isAdmin ? 'Administrator Account' : 'Staff Account' }}
+          {{
+            userType === 'admin'
+              ? 'Administrator Account'
+              : userType === 'staff'
+                ? 'Staff Account'
+                : 'Normal User Account'
+          }}
         </p>
         <p :class="[textColor, 'text-sm']">
-          {{ isAdmin 
-            ? 'This user will have full access to all features including user management.' 
-            : 'This user will have limited access without user management capabilities.' 
+          {{
+            userType === 'admin'
+              ? 'This user will have full access to all features including user management.'
+              : userType === 'staff'
+                ? 'This user will have elevated privileges but no user management capabilities.'
+                : 'This user will have standard access without administrative capabilities.'
           }}
         </p>
       </template>
@@ -195,7 +196,9 @@ const onSubmit = handleSubmit(async (values) => {
     <FormActions>
       <Button
         type="submit"
-        :label="`Create ${isAdmin ? 'Admin' : 'Staff'} User`"
+        :label="`Create ${
+          userType === 'admin' ? 'Admin' : userType === 'staff' ? 'Staff' : 'Normal'
+        } User`"
         :loading="isLoading"
         severity="primary"
         icon="pi pi-user-plus"
@@ -203,4 +206,3 @@ const onSubmit = handleSubmit(async (values) => {
     </FormActions>
   </form>
 </template>
-
