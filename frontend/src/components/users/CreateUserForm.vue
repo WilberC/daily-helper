@@ -12,6 +12,7 @@ import FormGroup from '@/components/common/form/FormGroup.vue'
 import FormActions from '@/components/common/form/FormActions.vue'
 import InfoBox from '@/components/common/feedback/InfoBox.vue'
 import Label from '@/components/common/typography/Label.vue'
+import { useTranslation } from '@/composables/useTranslation'
 
 interface Props {
   userType: 'admin' | 'staff' | 'normal'
@@ -21,18 +22,19 @@ const props = defineProps<Props>()
 
 const message = useMessage()
 const authStore = useAuthStore()
+const { t } = useTranslation()
 
 // Form validation schema
 const schema = yup.object({
   username: yup
     .string()
-    .required('Username is required')
-    .min(3, 'Username must be at least 3 characters'),
-  email: yup.string().required('Email is required').email('Must be a valid email'),
+    .required(t('validation.username.required'))
+    .min(3, t('validation.minLength', { field: t('users.form.username'), min: 3 })),
+  email: yup.string().required(t('validation.email.required')).email(t('validation.email.invalid')),
   password: yup
     .string()
-    .required('Password is required')
-    .min(8, 'Password must be at least 8 characters'),
+    .required(t('validation.password.required'))
+    .min(8, t('validation.password.minLength', { min: 8 })),
   firstName: yup.string(),
   lastName: yup.string(),
   isActive: yup.boolean(),
@@ -91,55 +93,55 @@ const onSubmit = handleSubmit(async (values) => {
   <form @submit.prevent="onSubmit" class="space-y-6 max-w-2xl">
     <FormGroup layout="grid">
       <!-- Username Field -->
-      <FormField label="Username" for="username" :error="errors.username" required>
+      <FormField :label="t('users.form.username')" for="username" :error="errors.username" required>
         <n-input
           id="username"
           v-model:value="username"
-          placeholder="Enter username"
+          :placeholder="t('users.form.enterUsername')"
           :status="errors.username ? 'error' : undefined"
           autocomplete="off"
         />
       </FormField>
 
       <!-- Email Field -->
-      <FormField label="Email" for="email" :error="errors.email" required>
+      <FormField :label="t('users.form.email')" for="email" :error="errors.email" required>
         <n-input
           id="email"
           v-model:value="email"
-          placeholder="Enter email"
+          :placeholder="t('users.form.enterEmail')"
           :status="errors.email ? 'error' : undefined"
           autocomplete="email"
         />
       </FormField>
 
       <!-- First Name Field -->
-      <FormField label="First Name" for="firstName">
+      <FormField :label="t('users.form.firstName')" for="firstName">
         <n-input
           id="firstName"
           v-model:value="firstName"
-          placeholder="Enter first name"
+          :placeholder="t('users.form.enterFirstName')"
           autocomplete="off"
         />
       </FormField>
 
       <!-- Last Name Field -->
-      <FormField label="Last Name" for="lastName">
+      <FormField :label="t('users.form.lastName')" for="lastName">
         <n-input
           id="lastName"
           v-model:value="lastName"
-          placeholder="Enter last name"
+          :placeholder="t('users.form.enterLastName')"
           autocomplete="off"
         />
       </FormField>
     </FormGroup>
 
     <!-- Password Field -->
-    <FormField label="Password" for="password" :error="errors.password" required>
+    <FormField :label="t('users.form.password')" for="password" :error="errors.password" required>
       <n-input
         id="password"
         v-model:value="password"
         :type="showPassword ? 'text' : 'password'"
-        placeholder="Enter password"
+        :placeholder="t('users.form.enterPassword')"
         :status="errors.password ? 'error' : undefined"
         show-password-on="click"
         autocomplete="new-password"
@@ -149,7 +151,7 @@ const onSubmit = handleSubmit(async (values) => {
     <!-- Active Checkbox -->
     <div class="flex items-center gap-2">
       <n-checkbox id="isActive" v-model:checked="isActive" />
-      <Label for="isActive" class="cursor-pointer">Active Account</Label>
+      <Label for="isActive" class="cursor-pointer">{{ t('users.form.isActive') }}</Label>
     </div>
 
     <!-- Role Info -->
@@ -157,19 +159,19 @@ const onSubmit = handleSubmit(async (values) => {
       <p class="font-medium mb-1">
         {{
           userType === 'admin'
-            ? 'Administrator Account'
+            ? t('users.info.adminAccount')
             : userType === 'staff'
-              ? 'Staff Account'
-              : 'Normal User Account'
+              ? t('users.info.staffAccount')
+              : t('users.info.normalAccount')
         }}
       </p>
       <p class="text-sm opacity-90">
         {{
           userType === 'admin'
-            ? 'This user will have full access to all features including user management.'
+            ? t('users.info.adminDescription')
             : userType === 'staff'
-              ? 'This user will have elevated privileges but no user management capabilities.'
-              : 'This user will have standard access without administrative capabilities.'
+              ? t('users.info.staffDescription')
+              : t('users.info.normalDescription')
         }}
       </p>
     </InfoBox>
@@ -180,7 +182,16 @@ const onSubmit = handleSubmit(async (values) => {
         <template #icon>
           <n-icon><PersonAdd /></n-icon>
         </template>
-        Create {{ userType === 'admin' ? 'Admin' : userType === 'staff' ? 'Staff' : 'Normal' }} User
+        {{
+          t('users.form.create', {
+            type:
+              userType === 'admin'
+                ? t('users.types.admin')
+                : userType === 'staff'
+                  ? t('users.types.staff')
+                  : t('users.types.normal'),
+          })
+        }}
       </n-button>
     </FormActions>
   </form>

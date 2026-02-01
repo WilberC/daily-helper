@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { NConfigProvider, NMessageProvider, NDialogProvider, darkTheme } from 'naive-ui'
 import { useThemeStore } from '@/stores/theme'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 
 const themeStore = useThemeStore()
 
@@ -95,6 +96,11 @@ const currentThemeOverrides = computed(() =>
     <n-message-provider>
       <n-dialog-provider>
         <div class="min-h-screen animate-fade-in">
+          <!-- Language Selector - Fixed position top-right -->
+          <div class="fixed top-4 right-4 z-50">
+            <LanguageSelector />
+          </div>
+
           <RouterView />
         </div>
       </n-dialog-provider>

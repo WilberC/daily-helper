@@ -12,9 +12,11 @@ import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeading from '@/components/common/typography/PageHeading.vue'
 import BodyText from '@/components/common/typography/BodyText.vue'
 import ContentCard from '@/components/layout/ContentCard.vue'
+import { useTranslation } from '@/composables/useTranslation'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useTranslation()
 
 const goToDashboard = () => {
   router.push({ name: 'dashboard' })
@@ -39,7 +41,7 @@ const handleLogout = async () => {
       </template>
 
       <template #title>
-        <PageHeading>User Management</PageHeading>
+        <PageHeading>{{ t('users.management') }}</PageHeading>
       </template>
 
       <template #actions>
@@ -48,7 +50,7 @@ const handleLogout = async () => {
           <template #icon>
             <n-icon><LogOut /></n-icon>
           </template>
-          Logout
+          {{ t('nav.logout') }}
         </n-button>
       </template>
     </PageHeader>
@@ -57,40 +59,30 @@ const handleLogout = async () => {
     <PageContainer>
       <ContentCard>
         <n-tabs type="line" animated>
-          <n-tab-pane name="admin" tab="Create Admin User">
+          <n-tab-pane name="admin" :tab="t('users.createAdmin')">
             <div class="py-4">
-              <BodyText class="mb-6">
-                Create a new administrator account with full system access including user
-                management.
-              </BodyText>
+              <BodyText class="mb-6">{{ t('users.info.adminDescription') }}</BodyText>
               <CreateUserForm user-type="admin" />
             </div>
           </n-tab-pane>
 
-          <n-tab-pane name="staff" tab="Create Staff User">
+          <n-tab-pane name="staff" :tab="t('users.createStaff')">
             <div class="py-4">
-              <BodyText class="mb-6">
-                Create a new staff account with elevated privileges but no user management access.
-              </BodyText>
+              <BodyText class="mb-6">{{ t('users.info.staffDescription') }}</BodyText>
               <CreateUserForm user-type="staff" />
             </div>
           </n-tab-pane>
 
-          <n-tab-pane name="normal" tab="Create Normal User">
+          <n-tab-pane name="normal" :tab="t('users.createNormal')">
             <div class="py-4">
-              <BodyText class="mb-6">
-                Create a new normal account with standard user access.
-              </BodyText>
+              <BodyText class="mb-6">{{ t('users.info.normalDescription') }}</BodyText>
               <CreateUserForm user-type="normal" />
             </div>
           </n-tab-pane>
 
-          <n-tab-pane name="manage" tab="Manage Users">
+          <n-tab-pane name="manage" :tab="t('users.list')">
             <div class="py-4">
-              <BodyText class="mb-6">
-                View and manage all users. You can update user information and permissions for
-                non-admin users.
-              </BodyText>
+              <BodyText class="mb-6">{{ t('dashboard.overview') }}</BodyText>
               <UserList />
             </div>
           </n-tab-pane>

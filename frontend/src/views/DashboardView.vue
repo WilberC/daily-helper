@@ -15,13 +15,17 @@ import BodyText from '@/components/common/typography/BodyText.vue'
 import DataField from '@/components/common/display/DataField.vue'
 import InfoBox from '@/components/common/feedback/InfoBox.vue'
 import GridContainer from '@/components/layout/GridContainer.vue'
+import { useTranslation } from '@/composables/useTranslation'
 
 const router = useRouter()
 const message = useMessage()
 const authStore = useAuthStore()
+const { t } = useTranslation()
 
 const user = computed(() => authStore.currentUser)
-const userRole = computed(() => (authStore.isAdmin ? 'Administrator' : 'Staff'))
+const userRole = computed(() =>
+  authStore.isAdmin ? t('users.types.admin') : t('users.types.staff'),
+)
 
 const handleLogout = async () => {
   const result = await authStore.logout()
@@ -44,7 +48,7 @@ const goToUserManagement = () => {
     <!-- Header -->
     <PageHeader>
       <template #title>
-        <PageHeading>Daily Helper</PageHeading>
+        <PageHeading>{{ t('login.title') }}</PageHeading>
       </template>
 
       <template #actions>
@@ -53,7 +57,7 @@ const goToUserManagement = () => {
           <template #icon>
             <n-icon><LogOut /></n-icon>
           </template>
-          Logout
+          {{ t('nav.logout') }}
         </n-button>
       </template>
     </PageHeader>
@@ -65,15 +69,17 @@ const goToUserManagement = () => {
         <n-card>
           <template #header>
             <div class="p-6 pb-0">
-              <SectionHeading variant="primary">Welcome Back!</SectionHeading>
+              <SectionHeading variant="primary">{{
+                t('dashboard.welcome', { name: user?.username || '' })
+              }}</SectionHeading>
             </div>
           </template>
 
           <div class="space-y-3">
-            <DataField label="Username" :value="user?.username" />
-            <DataField label="Email" :value="user?.email" />
+            <DataField :label="t('users.table.username')" :value="user?.username" />
+            <DataField :label="t('users.table.email')" :value="user?.email" />
 
-            <DataField label="Role">
+            <DataField :label="t('users.table.role')">
               <n-icon :component="authStore.isAdmin ? Shield : Person" class="mr-2" />
               {{ userRole }}
             </DataField>
@@ -84,18 +90,18 @@ const goToUserManagement = () => {
         <n-card v-if="authStore.isAdmin">
           <template #header>
             <div class="p-6 pb-0">
-              <SectionHeading>Quick Actions</SectionHeading>
+              <SectionHeading>{{ t('dashboard.quickActions') }}</SectionHeading>
             </div>
           </template>
 
           <div class="space-y-4">
-            <BodyText> As an administrator, you have access to user management features. </BodyText>
+            <BodyText>{{ t('dashboard.overview') }}</BodyText>
 
             <n-button type="primary" block @click="goToUserManagement">
               <template #icon>
                 <n-icon><People /></n-icon>
               </template>
-              Manage Users
+              {{ t('users.management') }}
             </n-button>
           </div>
         </n-card>
@@ -109,10 +115,7 @@ const goToUserManagement = () => {
           </template>
 
           <InfoBox variant="info">
-            <p>
-              You are logged in as a staff member. Contact an administrator for user management
-              access.
-            </p>
+            <p>{{ t('dashboard.overview') }}</p>
           </InfoBox>
         </n-card>
       </GridContainer>

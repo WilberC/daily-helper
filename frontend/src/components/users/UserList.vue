@@ -21,9 +21,11 @@ import SubHeading from '@/components/common/typography/SubHeading.vue'
 import FormField from '@/components/common/form/FormField.vue'
 import InfoBox from '@/components/common/feedback/InfoBox.vue'
 import Badge from '@/components/common/utils/Badge.vue'
+import { useTranslation } from '@/composables/useTranslation'
 
 const message = useMessage()
 const authStore = useAuthStore()
+const { t } = useTranslation()
 
 const users = ref<User[]>([])
 const loading = ref(false)
@@ -75,18 +77,18 @@ const saveUser = async () => {
   const result = await authStore.updateUser(input)
 
   if (result.success) {
-    message.success(result.message, { duration: 5000 })
+    message.success(t('users.form.updateSuccess'), { duration: 5000 })
     closeEditDialog()
     await loadUsers()
   } else {
-    message.error(result.message, { duration: 5000 })
+    message.error(t('users.form.updateError'), { duration: 5000 })
   }
 }
 
 // Define table columns
 const columns: DataTableColumns<User> = [
   {
-    title: 'Username',
+    title: () => t('users.table.username'),
     key: 'username',
     sorter: true,
     render: (row) => {
@@ -97,22 +99,22 @@ const columns: DataTableColumns<User> = [
     },
   },
   {
-    title: 'Email',
+    title: () => t('users.table.email'),
     key: 'email',
     sorter: true,
   },
   {
-    title: 'First Name',
+    title: () => t('users.table.firstName'),
     key: 'firstName',
     sorter: true,
   },
   {
-    title: 'Last Name',
+    title: () => t('users.table.lastName'),
     key: 'lastName',
     sorter: true,
   },
   {
-    title: 'Role',
+    title: () => t('users.table.role'),
     key: 'isStaff',
     sorter: (row1, row2) => Number(row1.isStaff) - Number(row2.isStaff),
     render: (row) => {
@@ -120,7 +122,7 @@ const columns: DataTableColumns<User> = [
     },
   },
   {
-    title: 'Status',
+    title: () => t('users.table.status'),
     key: 'isActive',
     sorter: (row1, row2) => Number(row1.isActive) - Number(row2.isActive),
     render: (row) => {
@@ -128,14 +130,14 @@ const columns: DataTableColumns<User> = [
     },
   },
   {
-    title: 'Joined',
+    title: () => t('users.table.joined'),
     key: 'dateJoined',
     sorter: (row1, row2) =>
       new Date(row1.dateJoined).getTime() - new Date(row2.dateJoined).getTime(),
     render: (row) => formatDate(row.dateJoined),
   },
   {
-    title: 'Actions',
+    title: () => t('users.table.actions'),
     key: 'actions',
     render: (row) => {
       return h(
@@ -145,7 +147,9 @@ const columns: DataTableColumns<User> = [
           circle: true,
           disabled: row.isStaff,
           onClick: () => openEditDialog(row),
-          title: row.isStaff ? 'Cannot edit admin users' : `Edit user ${row.username}`,
+          title: row.isStaff
+            ? t('users.actions.cannotEditAdmin')
+            : t('users.actions.editUser', { username: row.username }),
         },
         {
           icon: () => h(NIcon, { component: Pencil }),
@@ -169,12 +173,12 @@ onMounted(() => {
 <template>
   <div class="user-list-container">
     <div class="flex justify-between items-center mb-6">
-      <SectionHeading variant="primary">All Users</SectionHeading>
+      <SectionHeading variant="primary">{{ t('users.allUsers') }}</SectionHeading>
       <n-button secondary @click="loadUsers" :loading="loading">
         <template #icon>
           <n-icon><Refresh /></n-icon>
         </template>
-        Refresh
+        {{ t('users.actions.refresh') }}
       </n-button>
     </div>
 
@@ -192,31 +196,35 @@ onMounted(() => {
     <n-modal
       v-model:show="editDialogVisible"
       preset="card"
-      :title="`Edit User: ${editingUser?.username}`"
+      :title="t('users.modal.editTitle', { username: editingUser?.username || '' })"
       :style="{ width: '500px' }"
       :closable="true"
     >
       <div class="space-y-4 py-4">
         <!-- Email -->
-        <FormField label="Email" for="edit-email" required>
-          <n-input id="edit-email" v-model:value="editForm.email" placeholder="Enter email" />
+        <FormField :label="t('users.form.email')" for="edit-email" required>
+          <n-input
+            id="edit-email"
+            v-model:value="editForm.email"
+            :placeholder="t('users.form.enterEmail')"
+          />
         </FormField>
 
         <!-- First Name -->
-        <FormField label="First Name" for="edit-firstName">
+        <FormField :label="t('users.form.firstName')" for="edit-firstName">
           <n-input
             id="edit-firstName"
             v-model:value="editForm.firstName"
-            placeholder="Enter first name"
+            :placeholder="t('users.form.enterFirstName')"
           />
         </FormField>
 
         <!-- Last Name -->
-        <FormField label="Last Name" for="edit-lastName">
+        <FormField :label="t('users.form.lastName')" for="edit-lastName">
           <n-input
             id="edit-lastName"
             v-model:value="editForm.lastName"
-            placeholder="Enter last name"
+            :placeholder="t('users.form.enterLastName')"
           />
         </FormField>
 
@@ -224,7 +232,7 @@ onMounted(() => {
         <div
           class="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3"
         >
-          <SubHeading>Permissions</SubHeading>
+          <SubHeading>{{ t('users.modal.permissions') }}</SubHeading>
 
           <!-- Staff Permission -->
           <div class="flex items-center gap-2">
@@ -234,7 +242,7 @@ onMounted(() => {
               :disabled="editingUser?.isStaff"
             />
             <label for="edit-isStaff" class="text-gray-700 dark:text-gray-300 cursor-pointer">
-              Admin Access
+              {{ t('users.modal.adminAccess') }}
             </label>
           </div>
 
@@ -242,20 +250,20 @@ onMounted(() => {
           <div class="flex items-center gap-2">
             <n-checkbox id="edit-isActive" v-model:checked="editForm.isActive" />
             <label for="edit-isActive" class="text-gray-700 dark:text-gray-300 cursor-pointer">
-              Active Account
+              {{ t('users.modal.activeAccount') }}
             </label>
           </div>
 
           <InfoBox v-if="editingUser?.isStaff" variant="warning">
-            <p>⚠️ Admin users' permissions cannot be modified</p>
+            <p>{{ t('users.modal.adminWarning') }}</p>
           </InfoBox>
         </div>
       </div>
 
       <template #footer>
         <div class="flex justify-end gap-3">
-          <n-button @click="closeEditDialog" secondary> Cancel </n-button>
-          <n-button type="primary" @click="saveUser"> Save Changes </n-button>
+          <n-button @click="closeEditDialog" secondary>{{ t('users.modal.cancel') }}</n-button>
+          <n-button type="primary" @click="saveUser">{{ t('users.modal.saveChanges') }}</n-button>
         </div>
       </template>
     </n-modal>

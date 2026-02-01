@@ -10,15 +10,17 @@ import { LogIn } from '@vicons/ionicons5'
 import PageHeading from '@/components/common/typography/PageHeading.vue'
 import BodyText from '@/components/common/typography/BodyText.vue'
 import FormField from '@/components/common/form/FormField.vue'
+import { useTranslation } from '@/composables/useTranslation'
 
 const router = useRouter()
 const message = useMessage()
 const authStore = useAuthStore()
+const { t } = useTranslation()
 
 // Form validation schema
 const schema = yup.object({
-  username: yup.string().required('Username is required'),
-  password: yup.string().required('Password is required'),
+  username: yup.string().required(t('validation.username.required')),
+  password: yup.string().required(t('validation.password.required')),
 })
 
 const { defineField, handleSubmit, errors } = useForm({
@@ -51,31 +53,31 @@ const onSubmit = handleSubmit(async (values) => {
     <n-card class="w-full max-w-md shadow-2xl">
       <template #header>
         <div class="text-center pt-6 pb-2">
-          <PageHeading as="h1" size="xl">Daily Helper</PageHeading>
-          <BodyText size="sm" class="mt-2">Sign in to your account</BodyText>
+          <PageHeading as="h1" size="xl">{{ t('login.title') }}</PageHeading>
+          <BodyText size="sm" class="mt-2">{{ t('login.subtitle') }}</BodyText>
         </div>
       </template>
 
       <template #default>
         <form @submit.prevent="onSubmit" class="space-y-6">
           <!-- Username Field -->
-          <FormField label="Username" for="username" :error="errors.username">
+          <FormField :label="t('login.username')" for="username" :error="errors.username">
             <n-input
               id="username"
               v-model:value="username"
-              placeholder="Enter your username"
+              :placeholder="t('login.enterUsername')"
               :status="errors.username ? 'error' : undefined"
               autocomplete="username"
             />
           </FormField>
 
           <!-- Password Field -->
-          <FormField label="Password" for="password" :error="errors.password">
+          <FormField :label="t('login.password')" for="password" :error="errors.password">
             <n-input
               id="password"
               v-model:value="password"
               type="password"
-              placeholder="Enter your password"
+              :placeholder="t('login.enterPassword')"
               :status="errors.password ? 'error' : undefined"
               show-password-on="click"
               autocomplete="current-password"
@@ -87,14 +89,14 @@ const onSubmit = handleSubmit(async (values) => {
             <template #icon>
               <n-icon><LogIn /></n-icon>
             </template>
-            Sign In
+            {{ t('login.signIn') }}
           </n-button>
         </form>
       </template>
 
       <template #footer>
         <div class="text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>Admin access required for user management</p>
+          <p>{{ t('login.adminRequired') }}</p>
         </div>
       </template>
     </n-card>
