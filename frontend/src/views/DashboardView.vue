@@ -2,10 +2,9 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useToast } from 'primevue/usetoast'
-import Button from 'primevue/button'
-import Card from 'primevue/card'
-import Toast from 'primevue/toast'
+import { useMessage } from 'naive-ui'
+import { NButton, NCard, NIcon } from 'naive-ui'
+import { LogOut, People, Shield, Person } from '@vicons/ionicons5'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import PageWrapper from '@/components/layout/PageWrapper.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
@@ -18,7 +17,7 @@ import InfoBox from '@/components/common/feedback/InfoBox.vue'
 import GridContainer from '@/components/layout/GridContainer.vue'
 
 const router = useRouter()
-const toast = useToast()
+const message = useMessage()
 const authStore = useAuthStore()
 
 const user = computed(() => authStore.currentUser)
@@ -26,22 +25,12 @@ const userRole = computed(() => (authStore.isAdmin ? 'Administrator' : 'Staff'))
 
 const handleLogout = async () => {
   const result = await authStore.logout()
-  
+
   if (result.success) {
-    toast.add({
-      severity: 'success',
-      summary: 'Logged Out',
-      detail: result.message,
-      life: 3000,
-    })
+    message.success(result.message, { duration: 3000 })
     router.push({ name: 'login' })
   } else {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: result.message,
-      life: 5000,
-    })
+    message.error(result.message, { duration: 5000 })
   }
 }
 
@@ -52,23 +41,20 @@ const goToUserManagement = () => {
 
 <template>
   <PageWrapper>
-    <Toast />
-    
     <!-- Header -->
     <PageHeader>
       <template #title>
         <PageHeading>Daily Helper</PageHeading>
       </template>
-      
+
       <template #actions>
         <ThemeToggle />
-        <Button
-          label="Logout"
-          icon="pi pi-sign-out"
-          severity="danger"
-          outlined
-          @click="handleLogout"
-        />
+        <n-button secondary @click="handleLogout">
+          <template #icon>
+            <n-icon><LogOut /></n-icon>
+          </template>
+          Logout
+        </n-button>
       </template>
     </PageHeader>
 
@@ -76,69 +62,59 @@ const goToUserManagement = () => {
     <PageContainer>
       <GridContainer cols="2">
         <!-- Welcome Card -->
-        <Card>
+        <n-card>
           <template #header>
             <div class="p-6 pb-0">
               <SectionHeading variant="primary">Welcome Back!</SectionHeading>
             </div>
           </template>
-          
-          <template #content>
-            <div class="space-y-3">
-              <DataField label="Username" :value="user?.username" />
-              <DataField label="Email" :value="user?.email" />
-              
-              <DataField label="Role">
-                <i :class="authStore.isAdmin ? 'pi pi-shield' : 'pi pi-user'" class="mr-2"></i>
-                {{ userRole }}
-              </DataField>
-            </div>
-          </template>
-        </Card>
+
+          <div class="space-y-3">
+            <DataField label="Username" :value="user?.username" />
+            <DataField label="Email" :value="user?.email" />
+
+            <DataField label="Role">
+              <n-icon :component="authStore.isAdmin ? Shield : Person" class="mr-2" />
+              {{ userRole }}
+            </DataField>
+          </div>
+        </n-card>
 
         <!-- Quick Actions Card -->
-        <Card v-if="authStore.isAdmin">
+        <n-card v-if="authStore.isAdmin">
           <template #header>
             <div class="p-6 pb-0">
               <SectionHeading>Quick Actions</SectionHeading>
             </div>
           </template>
-          
-          <template #content>
-            <div class="space-y-4">
-              <BodyText>
-                As an administrator, you have access to user management features.
-              </BodyText>
-              
-              <Button
-                label="Manage Users"
-                icon="pi pi-users"
-                severity="primary"
-                class="w-full"
-                @click="goToUserManagement"
-              />
-            </div>
-          </template>
-        </Card>
+
+          <div class="space-y-4">
+            <BodyText> As an administrator, you have access to user management features. </BodyText>
+
+            <n-button type="primary" block @click="goToUserManagement">
+              <template #icon>
+                <n-icon><People /></n-icon>
+              </template>
+              Manage Users
+            </n-button>
+          </div>
+        </n-card>
 
         <!-- Info Card for Non-Admin -->
-        <Card v-else>
+        <n-card v-else>
           <template #header>
             <div class="p-6 pb-0">
               <SectionHeading variant="primary">Information</SectionHeading>
             </div>
           </template>
-          
-          <template #content>
-            <InfoBox variant="info">
-              <template #default="{ textColor }">
-                <p :class="textColor">
-                  You are logged in as a staff member. Contact an administrator for user management access.
-                </p>
-              </template>
-            </InfoBox>
-          </template>
-        </Card>
+
+          <InfoBox variant="info">
+            <p>
+              You are logged in as a staff member. Contact an administrator for user management
+              access.
+            </p>
+          </InfoBox>
+        </n-card>
       </GridContainer>
     </PageContainer>
   </PageWrapper>

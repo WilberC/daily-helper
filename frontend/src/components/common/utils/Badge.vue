@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import Tag from 'primevue/tag'
+import { NTag } from 'naive-ui'
 
 interface Props {
   variant?: 'admin' | 'staff' | 'active' | 'inactive' | 'info' | 'success' | 'warning' | 'danger'
@@ -9,23 +9,23 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const severity = computed(() => {
-  const severities = {
-    admin: 'danger',
-    staff: 'info',
+const tagType = computed(() => {
+  const typeMap = {
+    admin: 'error',
+    staff: 'warning',
     active: 'success',
-    inactive: 'warning',
+    inactive: 'default',
     info: 'info',
     success: 'success',
     warning: 'warning',
-    danger: 'danger',
-  }
-  return props.variant ? severities[props.variant] : 'info'
+    danger: 'error',
+  } as const
+  return props.variant ? typeMap[props.variant] : 'info'
 })
 
 const displayValue = computed(() => {
   if (props.value) return props.value
-  
+
   const defaults = {
     admin: 'Admin',
     staff: 'Staff',
@@ -41,7 +41,7 @@ const displayValue = computed(() => {
 </script>
 
 <template>
-  <Tag :value="displayValue" :severity="severity as any">
-    <slot />
-  </Tag>
+  <n-tag :type="tagType" size="small" round>
+    <slot>{{ displayValue }}</slot>
+  </n-tag>
 </template>

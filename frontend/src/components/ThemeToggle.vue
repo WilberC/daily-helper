@@ -1,18 +1,24 @@
 <script setup lang="ts">
 import { useThemeStore } from '@/stores/theme'
-import Button from 'primevue/button'
+import { NButton, NIcon } from 'naive-ui'
+import { Moon, Sunny } from '@vicons/ionicons5'
 
 const themeStore = useThemeStore()
 </script>
 
 <template>
-  <Button
-    :icon="themeStore.isDark ? 'pi pi-sun' : 'pi pi-moon'"
-    :aria-label="themeStore.isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-    severity="secondary"
-    text
-    rounded
+  <n-button
+    circle
+    quaternary
     @click="themeStore.toggleTheme"
-    v-tooltip.bottom="themeStore.isDark ? 'Light Mode' : 'Dark Mode'"
-  />
+    :aria-label="themeStore.isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+    class="transition-transform hover:scale-110"
+  >
+    <template #icon>
+      <n-icon>
+        <Sunny v-if="themeStore.isDark" />
+        <Moon v-else />
+      </n-icon>
+    </template>
+  </n-button>
 </template>

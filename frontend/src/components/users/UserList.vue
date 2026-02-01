@@ -1,25 +1,28 @@
 /** * Displays a list of users in a data table with edit capabilities. * Allows administrators to
 view and update user information. * @component */
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useToast } from 'primevue/usetoast'
+import { ref, onMounted, h } from 'vue'
+import { useMessage } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import type { User, UpdateUserInput } from '@/types/user'
 import { formatDate } from '@/composables/useFormatters'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
-import InputText from 'primevue/inputtext'
-import Checkbox from 'primevue/checkbox'
-import Tag from 'primevue/tag'
+import {
+  NDataTable,
+  NButton,
+  NModal,
+  NInput,
+  NCheckbox,
+  NIcon,
+  type DataTableColumns,
+} from 'naive-ui'
+import { Person, Pencil, Refresh } from '@vicons/ionicons5'
 import SectionHeading from '@/components/common/typography/SectionHeading.vue'
 import SubHeading from '@/components/common/typography/SubHeading.vue'
 import FormField from '@/components/common/form/FormField.vue'
 import InfoBox from '@/components/common/feedback/InfoBox.vue'
 import Badge from '@/components/common/utils/Badge.vue'
 
-const toast = useToast()
+const message = useMessage()
 const authStore = useAuthStore()
 
 const users = ref<User[]>([])
@@ -72,22 +75,90 @@ const saveUser = async () => {
   const result = await authStore.updateUser(input)
 
   if (result.success) {
-    toast.add({
-      severity: 'success',
-      summary: 'User Updated',
-      detail: result.message,
-      life: 5000,
-    })
+    message.success(result.message, { duration: 5000 })
     closeEditDialog()
     await loadUsers()
   } else {
-    toast.add({
-      severity: 'error',
-      summary: 'Update Failed',
-      detail: result.message,
-      life: 5000,
-    })
+    message.error(result.message, { duration: 5000 })
   }
+}
+
+// Define table columns
+const columns: DataTableColumns<User> = [
+  {
+    title: 'Username',
+    key: 'username',
+    sorter: true,
+    render: (row) => {
+      return h('div', { class: 'flex items-center gap-2' }, [
+        h(NIcon, { component: Person, color: '#18a058', size: 18 }),
+        h('span', { class: 'font-medium' }, row.username),
+      ])
+    },
+  },
+  {
+    title: 'Email',
+    key: 'email',
+    sorter: true,
+  },
+  {
+    title: 'First Name',
+    key: 'firstName',
+    sorter: true,
+  },
+  {
+    title: 'Last Name',
+    key: 'lastName',
+    sorter: true,
+  },
+  {
+    title: 'Role',
+    key: 'isStaff',
+    sorter: (row1, row2) => Number(row1.isStaff) - Number(row2.isStaff),
+    render: (row) => {
+      return h(Badge, { variant: row.isStaff ? 'admin' : 'staff' })
+    },
+  },
+  {
+    title: 'Status',
+    key: 'isActive',
+    sorter: (row1, row2) => Number(row1.isActive) - Number(row2.isActive),
+    render: (row) => {
+      return h(Badge, { variant: row.isActive ? 'active' : 'inactive' })
+    },
+  },
+  {
+    title: 'Joined',
+    key: 'dateJoined',
+    sorter: (row1, row2) =>
+      new Date(row1.dateJoined).getTime() - new Date(row2.dateJoined).getTime(),
+    render: (row) => formatDate(row.dateJoined),
+  },
+  {
+    title: 'Actions',
+    key: 'actions',
+    render: (row) => {
+      return h(
+        NButton,
+        {
+          text: true,
+          circle: true,
+          disabled: row.isStaff,
+          onClick: () => openEditDialog(row),
+          title: row.isStaff ? 'Cannot edit admin users' : `Edit user ${row.username}`,
+        },
+        {
+          icon: () => h(NIcon, { component: Pencil }),
+        },
+      )
+    },
+  },
+]
+
+const paginationProps = {
+  pageSize: 10,
+  pageSizes: [5, 10, 20, 50],
+  showSizePicker: true,
 }
 
 onMounted(() => {
@@ -99,165 +170,94 @@ onMounted(() => {
   <div class="user-list-container">
     <div class="flex justify-between items-center mb-6">
       <SectionHeading variant="primary">All Users</SectionHeading>
-      <Button
-        label="Refresh"
-        icon="pi pi-refresh"
-        @click="loadUsers"
-        :loading="loading"
-        severity="secondary"
-        outlined
-      />
+      <n-button secondary @click="loadUsers" :loading="loading">
+        <template #icon>
+          <n-icon><Refresh /></n-icon>
+        </template>
+        Refresh
+      </n-button>
     </div>
 
-    <DataTable
-      :value="users"
+    <n-data-table
+      :columns="columns"
+      :data="users"
       :loading="loading"
-      stripedRows
-      paginator
-      :rows="10"
-      :rowsPerPageOptions="[5, 10, 20, 50]"
+      :pagination="paginationProps"
+      striped
+      :bordered="false"
       class="user-table"
-      responsiveLayout="scroll"
-      aria-label="User list table"
-    >
-      <Column field="username" header="Username" sortable>
-        <template #body="{ data }">
-          <div class="flex items-center gap-2">
-            <i class="pi pi-user text-primary-400" aria-hidden="true"></i>
-            <span class="font-medium">{{ data.username }}</span>
-          </div>
-        </template>
-      </Column>
+    />
 
-      <Column field="email" header="Email" sortable />
-
-      <Column field="firstName" header="First Name" sortable />
-
-      <Column field="lastName" header="Last Name" sortable />
-
-      <Column field="isStaff" header="Role" sortable>
-        <template #body="{ data }">
-          <Badge :variant="data.isStaff ? 'admin' : 'staff'" />
-        </template>
-      </Column>
-
-      <Column field="isActive" header="Status" sortable>
-        <template #body="{ data }">
-          <Badge :variant="data.isActive ? 'active' : 'inactive'" />
-        </template>
-      </Column>
-
-      <Column field="dateJoined" header="Joined" sortable>
-        <template #body="{ data }">
-          {{ formatDate(data.dateJoined) }}
-        </template>
-      </Column>
-
-      <Column header="Actions">
-        <template #body="{ data }">
-          <Button
-            icon="pi pi-pencil"
-            severity="info"
-            text
-            rounded
-            @click="openEditDialog(data)"
-            :disabled="data.isStaff"
-            :aria-label="data.isStaff ? 'Cannot edit admin users' : `Edit user ${data.username}`"
-            v-tooltip.top="data.isStaff ? 'Cannot edit admin users' : 'Edit user'"
-          />
-        </template>
-      </Column>
-    </DataTable>
-
-    <!-- Edit User Dialog -->
-    <Dialog
-      v-model:visible="editDialogVisible"
-      :header="`Edit User: ${editingUser?.username}`"
-      :modal="true"
-      :closable="true"
+    <!-- Edit User Modal -->
+    <n-modal
+      v-model:show="editDialogVisible"
+      preset="card"
+      :title="`Edit User: ${editingUser?.username}`"
       :style="{ width: '500px' }"
-      class="edit-dialog"
+      :closable="true"
     >
       <div class="space-y-4 py-4">
         <!-- Email -->
         <FormField label="Email" for="edit-email" required>
-          <InputText
-            id="edit-email"
-            v-model="editForm.email"
-            type="email"
-            placeholder="Enter email"
-            class="w-full"
-          />
+          <n-input id="edit-email" v-model:value="editForm.email" placeholder="Enter email" />
         </FormField>
 
         <!-- First Name -->
         <FormField label="First Name" for="edit-firstName">
-          <InputText
+          <n-input
             id="edit-firstName"
-            v-model="editForm.firstName"
+            v-model:value="editForm.firstName"
             placeholder="Enter first name"
-            class="w-full"
           />
         </FormField>
 
         <!-- Last Name -->
         <FormField label="Last Name" for="edit-lastName">
-          <InputText
+          <n-input
             id="edit-lastName"
-            v-model="editForm.lastName"
+            v-model:value="editForm.lastName"
             placeholder="Enter last name"
-            class="w-full"
           />
         </FormField>
 
         <!-- Permissions Section -->
         <div
-          class="bg-surface-0 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-lg p-4 space-y-3"
+          class="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3"
         >
           <SubHeading>Permissions</SubHeading>
 
           <!-- Staff Permission -->
           <div class="flex items-center gap-2">
-            <Checkbox
+            <n-checkbox
               id="edit-isStaff"
-              v-model="editForm.isStaff"
-              :binary="true"
+              v-model:checked="editForm.isStaff"
               :disabled="editingUser?.isStaff"
             />
-            <label for="edit-isStaff" class="text-surface-700 dark:text-dark-text cursor-pointer">
+            <label for="edit-isStaff" class="text-gray-700 dark:text-gray-300 cursor-pointer">
               Admin Access
             </label>
           </div>
 
           <!-- Active Status -->
           <div class="flex items-center gap-2">
-            <Checkbox id="edit-isActive" v-model="editForm.isActive" :binary="true" />
-            <label for="edit-isActive" class="text-surface-700 dark:text-dark-text cursor-pointer">
+            <n-checkbox id="edit-isActive" v-model:checked="editForm.isActive" />
+            <label for="edit-isActive" class="text-gray-700 dark:text-gray-300 cursor-pointer">
               Active Account
             </label>
           </div>
 
           <InfoBox v-if="editingUser?.isStaff" variant="warning">
-            <template #default="{ textColor }">
-              <p :class="textColor">
-                <i class="pi pi-exclamation-triangle mr-1"></i>
-                Admin users' permissions cannot be modified
-              </p>
-            </template>
+            <p>⚠️ Admin users' permissions cannot be modified</p>
           </InfoBox>
         </div>
       </div>
 
       <template #footer>
-        <Button
-          label="Cancel"
-          icon="pi pi-times"
-          @click="closeEditDialog"
-          severity="secondary"
-          outlined
-        />
-        <Button label="Save Changes" icon="pi pi-check" @click="saveUser" severity="primary" />
+        <div class="flex justify-end gap-3">
+          <n-button @click="closeEditDialog" secondary> Cancel </n-button>
+          <n-button type="primary" @click="saveUser"> Save Changes </n-button>
+        </div>
       </template>
-    </Dialog>
+    </n-modal>
   </div>
 </template>

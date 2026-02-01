@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import Button from 'primevue/button'
-import Toast from 'primevue/toast'
-import TabView from 'primevue/tabview'
-import TabPanel from 'primevue/tabpanel'
+import { NButton, NTabs, NTabPane, NIcon } from 'naive-ui'
+import { ArrowBack, LogOut } from '@vicons/ionicons5'
 import CreateUserForm from '@/components/users/CreateUserForm.vue'
 import UserList from '@/components/users/UserList.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
@@ -31,12 +28,14 @@ const handleLogout = async () => {
 
 <template>
   <PageWrapper>
-    <Toast />
-
     <!-- Header -->
     <PageHeader>
       <template #back-button>
-        <Button icon="pi pi-arrow-left" severity="secondary" text @click="goToDashboard" />
+        <n-button text circle @click="goToDashboard">
+          <template #icon>
+            <n-icon><ArrowBack /></n-icon>
+          </template>
+        </n-button>
       </template>
 
       <template #title>
@@ -45,21 +44,20 @@ const handleLogout = async () => {
 
       <template #actions>
         <ThemeToggle />
-        <Button
-          label="Logout"
-          icon="pi pi-sign-out"
-          severity="danger"
-          outlined
-          @click="handleLogout"
-        />
+        <n-button secondary @click="handleLogout">
+          <template #icon>
+            <n-icon><LogOut /></n-icon>
+          </template>
+          Logout
+        </n-button>
       </template>
     </PageHeader>
 
     <!-- Main Content -->
     <PageContainer>
       <ContentCard>
-        <TabView>
-          <TabPanel header="Create Admin User">
+        <n-tabs type="line" animated>
+          <n-tab-pane name="admin" tab="Create Admin User">
             <div class="py-4">
               <BodyText class="mb-6">
                 Create a new administrator account with full system access including user
@@ -67,27 +65,27 @@ const handleLogout = async () => {
               </BodyText>
               <CreateUserForm user-type="admin" />
             </div>
-          </TabPanel>
+          </n-tab-pane>
 
-          <TabPanel header="Create Staff User">
+          <n-tab-pane name="staff" tab="Create Staff User">
             <div class="py-4">
               <BodyText class="mb-6">
                 Create a new staff account with elevated privileges but no user management access.
               </BodyText>
               <CreateUserForm user-type="staff" />
             </div>
-          </TabPanel>
+          </n-tab-pane>
 
-          <TabPanel header="Create Normal User">
+          <n-tab-pane name="normal" tab="Create Normal User">
             <div class="py-4">
               <BodyText class="mb-6">
                 Create a new normal account with standard user access.
               </BodyText>
               <CreateUserForm user-type="normal" />
             </div>
-          </TabPanel>
+          </n-tab-pane>
 
-          <TabPanel header="Manage Users">
+          <n-tab-pane name="manage" tab="Manage Users">
             <div class="py-4">
               <BodyText class="mb-6">
                 View and manage all users. You can update user information and permissions for
@@ -95,8 +93,8 @@ const handleLogout = async () => {
               </BodyText>
               <UserList />
             </div>
-          </TabPanel>
-        </TabView>
+          </n-tab-pane>
+        </n-tabs>
       </ContentCard>
     </PageContainer>
   </PageWrapper>

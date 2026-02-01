@@ -1,16 +1,12 @@
-@layer tailwind-base, primevue, tailwind-utilities;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@layer tailwind-base {
-  @tailwind base;
-}
-
-@layer tailwind-utilities {
-  @tailwind components;
-  @tailwind utilities;
-}
-
-/* Global theme styles */
 @layer base {
+  * {
+    @apply transition-colors duration-200;
+  }
+
   html {
     color-scheme: light dark;
   }
@@ -18,24 +14,8 @@
   html.dark {
     color-scheme: dark;
   }
-}
 
-/* Custom scrollbar for dark mode */
-@layer utilities {
-  .scrollbar-dark::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  .scrollbar-dark::-webkit-scrollbar-track {
-    @apply bg-dark-surface;
-  }
-
-  .scrollbar-dark::-webkit-scrollbar-thumb {
-    @apply bg-dark-border rounded;
-  }
-
-  .scrollbar-dark::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-600;
+  body {
+    @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
   }
 }

@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useToast } from 'primevue/usetoast'
+import { useMessage } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import type { RegisterInput } from '@/types/user'
-import InputText from 'primevue/inputtext'
-import Password from 'primevue/password'
-import Button from 'primevue/button'
-import Checkbox from 'primevue/checkbox'
+import { NInput, NCheckbox, NButton, NIcon } from 'naive-ui'
+import { PersonAdd } from '@vicons/ionicons5'
 import FormField from '@/components/common/form/FormField.vue'
 import FormGroup from '@/components/common/form/FormGroup.vue'
 import FormActions from '@/components/common/form/FormActions.vue'
@@ -21,7 +19,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const toast = useToast()
+const message = useMessage()
 const authStore = useAuthStore()
 
 // Form validation schema
@@ -60,6 +58,7 @@ const [lastName] = defineField('lastName')
 const [isActive] = defineField('isActive')
 
 const isLoading = ref(false)
+const showPassword = ref(false)
 
 const onSubmit = handleSubmit(async (values) => {
   isLoading.value = true
@@ -80,70 +79,55 @@ const onSubmit = handleSubmit(async (values) => {
   isLoading.value = false
 
   if (result.success) {
-    toast.add({
-      severity: 'success',
-      summary: 'User Created',
-      detail: result.message,
-      life: 5000,
-    })
+    message.success(result.message, { duration: 5000 })
     resetForm()
   } else {
-    toast.add({
-      severity: 'error',
-      summary: 'Creation Failed',
-      detail: result.message,
-      life: 5000,
-    })
+    message.error(result.message, { duration: 5000 })
   }
 })
 </script>
 
 <template>
-  <form @submit="onSubmit" class="space-y-6 max-w-2xl">
+  <form @submit.prevent="onSubmit" class="space-y-6 max-w-2xl">
     <FormGroup layout="grid">
       <!-- Username Field -->
       <FormField label="Username" for="username" :error="errors.username" required>
-        <InputText
+        <n-input
           id="username"
-          v-model="username"
+          v-model:value="username"
           placeholder="Enter username"
-          :class="{ 'p-invalid': errors.username }"
-          class="w-full"
+          :status="errors.username ? 'error' : undefined"
           autocomplete="off"
         />
       </FormField>
 
       <!-- Email Field -->
       <FormField label="Email" for="email" :error="errors.email" required>
-        <InputText
+        <n-input
           id="email"
-          v-model="email"
-          type="email"
+          v-model:value="email"
           placeholder="Enter email"
-          :class="{ 'p-invalid': errors.email }"
-          class="w-full"
-          autocomplete="off"
+          :status="errors.email ? 'error' : undefined"
+          autocomplete="email"
         />
       </FormField>
 
       <!-- First Name Field -->
       <FormField label="First Name" for="firstName">
-        <InputText
+        <n-input
           id="firstName"
-          v-model="firstName"
+          v-model:value="firstName"
           placeholder="Enter first name"
-          class="w-full"
           autocomplete="off"
         />
       </FormField>
 
       <!-- Last Name Field -->
       <FormField label="Last Name" for="lastName">
-        <InputText
+        <n-input
           id="lastName"
-          v-model="lastName"
+          v-model:value="lastName"
           placeholder="Enter last name"
-          class="w-full"
           autocomplete="off"
         />
       </FormField>
@@ -151,58 +135,53 @@ const onSubmit = handleSubmit(async (values) => {
 
     <!-- Password Field -->
     <FormField label="Password" for="password" :error="errors.password" required>
-      <Password
+      <n-input
         id="password"
-        v-model="password"
+        v-model:value="password"
+        :type="showPassword ? 'text' : 'password'"
         placeholder="Enter password"
-        :class="{ 'p-invalid': errors.password }"
-        toggle-mask
-        input-class="w-full"
+        :status="errors.password ? 'error' : undefined"
+        show-password-on="click"
         autocomplete="new-password"
       />
     </FormField>
 
     <!-- Active Checkbox -->
     <div class="flex items-center gap-2">
-      <Checkbox id="isActive" v-model="isActive" :binary="true" />
-      <Label for="isActive" class="cursor-pointer"> Active Account </Label>
+      <n-checkbox id="isActive" v-model:checked="isActive" />
+      <Label for="isActive" class="cursor-pointer">Active Account</Label>
     </div>
 
     <!-- Role Info -->
     <InfoBox variant="info">
-      <template #default="{ titleColor, textColor }">
-        <p :class="[titleColor, 'font-medium mb-1']">
-          {{
-            userType === 'admin'
-              ? 'Administrator Account'
-              : userType === 'staff'
-                ? 'Staff Account'
-                : 'Normal User Account'
-          }}
-        </p>
-        <p :class="[textColor, 'text-sm']">
-          {{
-            userType === 'admin'
-              ? 'This user will have full access to all features including user management.'
-              : userType === 'staff'
-                ? 'This user will have elevated privileges but no user management capabilities.'
-                : 'This user will have standard access without administrative capabilities.'
-          }}
-        </p>
-      </template>
+      <p class="font-medium mb-1">
+        {{
+          userType === 'admin'
+            ? 'Administrator Account'
+            : userType === 'staff'
+              ? 'Staff Account'
+              : 'Normal User Account'
+        }}
+      </p>
+      <p class="text-sm opacity-90">
+        {{
+          userType === 'admin'
+            ? 'This user will have full access to all features including user management.'
+            : userType === 'staff'
+              ? 'This user will have elevated privileges but no user management capabilities.'
+              : 'This user will have standard access without administrative capabilities.'
+        }}
+      </p>
     </InfoBox>
 
     <!-- Submit Button -->
     <FormActions>
-      <Button
-        type="submit"
-        :label="`Create ${
-          userType === 'admin' ? 'Admin' : userType === 'staff' ? 'Staff' : 'Normal'
-        } User`"
-        :loading="isLoading"
-        severity="primary"
-        icon="pi pi-user-plus"
-      />
+      <n-button type="primary" attr-type="submit" :loading="isLoading" size="large">
+        <template #icon>
+          <n-icon><PersonAdd /></n-icon>
+        </template>
+        Create {{ userType === 'admin' ? 'Admin' : userType === 'staff' ? 'Staff' : 'Normal' }} User
+      </n-button>
     </FormActions>
   </form>
 </template>
